@@ -4,7 +4,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from blog.models import Category, Post
+from blog.models import Category
 from blog.services import create_post, publish_post
 
 User = get_user_model()
@@ -206,7 +206,12 @@ def test_user_posts_endpoints(author, stranger, category):
 
     p_pub = create_post(author=author, category=category, title="Pub Post", content_markdown="C1")
     publish_post(p_pub, author)
-    p_draft = create_post(author=author, category=category, title="Draft Post", content_markdown="C2")
+    p_draft = create_post(
+        author=author,
+        category=category,
+        title="Draft Post",
+        content_markdown="C2",
+    )
 
     client = APIClient()
 

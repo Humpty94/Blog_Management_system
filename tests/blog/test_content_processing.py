@@ -26,7 +26,7 @@ def test_render_markdown_disables_and_sanitizes_raw_html():
     assert "<img" not in html
     assert "&lt;img" in html
     # javascript: scheme is stripped / not rendered as an active link
-    assert "href=\"javascript:" not in html
+    assert 'href="javascript:' not in html
 
 
 def test_extract_plain_text():
