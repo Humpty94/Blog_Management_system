@@ -8,11 +8,19 @@ from drf_spectacular.views import (
 )
 
 from accounts.urls import auth_urlpatterns, users_urlpatterns
+from blog.urls import (
+    blog_users_urlpatterns,
+    categories_urlpatterns,
+    posts_urlpatterns,
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/health/", include("common.urls")),
     path("api/v1/auth/", include((auth_urlpatterns, "auth"))),
+    path("api/v1/categories/", include((categories_urlpatterns, "categories"))),
+    path("api/v1/posts/", include((posts_urlpatterns, "posts"))),
+    path("api/v1/users/", include((blog_users_urlpatterns, "blog-users"))),
     path("api/v1/users/", include((users_urlpatterns, "users"))),
 ]
 
