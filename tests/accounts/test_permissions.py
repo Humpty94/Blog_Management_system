@@ -1,7 +1,7 @@
+import pytest
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory
 from django.utils import timezone
-import pytest
 from rest_framework.views import APIView
 
 from accounts.permissions import IsEmailVerified

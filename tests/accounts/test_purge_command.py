@@ -1,11 +1,11 @@
-from datetime import timedelta
 import io
 import uuid
+from datetime import timedelta
 
+import pytest
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.utils import timezone
-import pytest
 
 from accounts.models import RefreshTokenRecord
 
