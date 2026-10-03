@@ -14,9 +14,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Annotate posts with true like count and filter those with discrepancies
-        discrepant_posts = Post.objects.annotate(
-            true_likes=Count("likes")
-        ).exclude(like_count=models.F("true_likes"))
+        discrepant_posts = Post.objects.annotate(true_likes=Count("likes")).exclude(
+            like_count=models.F("true_likes")
+        )
 
         reconciled_count = 0
         for post in discrepant_posts:
