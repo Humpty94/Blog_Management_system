@@ -58,6 +58,32 @@ function WorkspaceContent() {
   const [deactivatePassword, setDeactivatePassword] = useState("");
   const [showDeactivateModal, setShowDeactivateModal] = useState(false);
 
+  const resetEditor = React.useCallback(() => {
+    setEditingPostSlug(null);
+    setEditorTitle("");
+    setEditorMarkdown("");
+    setEditorStatus("draft");
+    setEditorMessage(null);
+    if (categories.length > 0) {
+      setEditorCategory(categories[0].slug);
+    }
+  }, [categories]);
+
+  // Sync tab and edit slug with URL query params
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    const editParam = searchParams.get("edit");
+    if (tabParam === "new") {
+      resetEditor();
+      setActiveTab("editor");
+    } else if (editParam) {
+      setEditingPostSlug(editParam);
+      setActiveTab("editor");
+    } else if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams, resetEditor]);
+
   // Fetch initial workspace data
   useEffect(() => {
     if (!user) return;
@@ -199,17 +225,6 @@ function WorkspaceContent() {
       await loadWorkspacePosts();
     } catch (err) {
       console.error("Failed to delete post:", err);
-    }
-  };
-
-  const resetEditor = () => {
-    setEditingPostSlug(null);
-    setEditorTitle("");
-    setEditorMarkdown("");
-    setEditorStatus("draft");
-    setEditorMessage(null);
-    if (categories.length > 0) {
-      setEditorCategory(categories[0].slug);
     }
   };
 
@@ -622,6 +637,17 @@ function WorkspaceContent() {
                     Save Draft
                   </button>
 
+                  {editingPostSlug && editorStatus === "published" && (
+                    <Link
+                      href={`/posts/${editingPostSlug}`}
+                      target="_blank"
+                      className="inline-flex items-center gap-1 text-xs font-semibold py-1.5 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>View Live</span>
+                    </Link>
+                  )}
+
                   <button
                     onClick={handlePublishToggle}
                     disabled={savingPost}
@@ -736,6 +762,20 @@ function WorkspaceContent() {
                       <p className="text-xs text-zinc-500 line-clamp-2">
                         {b.post.excerpt}
                       </p>
+                      <div className="pt-2 flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800">
+                        <span className="text-[11px] text-zinc-400">
+                          Saved {new Date(b.created_at).toLocaleDateString()}
+                        </span>
+                        <button
+                          onClick={async () => {
+                            await api.unbookmarkPost(b.post.slug);
+                            loadBookmarks();
+                          }}
+                          className="text-xs font-semibold text-red-600 dark:text-red-400 hover:underline"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </article>
                   ))}
                 </div>
