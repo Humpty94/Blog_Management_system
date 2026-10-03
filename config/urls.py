@@ -17,15 +17,21 @@ from comments.urls import (
     comments_urlpatterns,
     post_comments_urlpatterns,
 )
+from engagement.urls import (
+    engagement_users_urlpatterns,
+    post_engagement_urlpatterns,
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/health/", include("common.urls")),
     path("api/v1/auth/", include((auth_urlpatterns, "auth"))),
     path("api/v1/categories/", include((categories_urlpatterns, "categories"))),
+    path("api/v1/posts/", include((post_engagement_urlpatterns, "post-engagement"))),
     path("api/v1/posts/", include((post_comments_urlpatterns, "post-comments"))),
     path("api/v1/posts/", include((posts_urlpatterns, "posts"))),
     path("api/v1/comments/", include((comments_urlpatterns, "comments"))),
+    path("api/v1/users/", include((engagement_users_urlpatterns, "engagement-users"))),
     path("api/v1/users/", include((blog_users_urlpatterns, "blog-users"))),
     path("api/v1/users/", include((users_urlpatterns, "users"))),
 ]

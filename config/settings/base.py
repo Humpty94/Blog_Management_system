@@ -50,6 +50,7 @@ LOCAL_APPS = [
     "accounts.apps.AccountsConfig",
     "blog.apps.BlogConfig",
     "comments.apps.CommentsConfig",
+    "engagement.apps.EngagementConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
