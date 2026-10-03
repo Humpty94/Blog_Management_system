@@ -112,9 +112,12 @@ def custom_exception_handler(exc, context):
                 response.data.get("detail", "Authentication credentials were not provided.")
             )
         elif isinstance(exc, exceptions.AuthenticationFailed):
-            # Check for specific token errors
-            raw_detail = str(response.data.get("detail", ""))
-            if "expired" in raw_detail.lower():
+            detail_obj = response.data.get("detail")
+            code_attr = getattr(detail_obj, "code", None) or getattr(exc, "code", None)
+            raw_detail = str(detail_obj or "")
+            if code_attr and code_attr != "authentication_failed":
+                code = str(code_attr)
+            elif "expired" in raw_detail.lower():
                 code = "token_expired"
             elif "invalid" in raw_detail.lower():
                 code = "token_invalid"

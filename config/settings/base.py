@@ -148,10 +148,7 @@ REST_FRAMEWORK = {
         "rest_framework.filters.OrderingFilter",
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_THROTTLE_CLASSES": (
-        "common.throttles.AuthRateThrottle",
-        "common.throttles.WriteRateThrottle",
-    ),
+    "DEFAULT_THROTTLE_CLASSES": ("common.throttles.WriteRateThrottle",),
     "DEFAULT_THROTTLE_RATES": {
         "auth": "5/minute",
         "write": "60/minute",

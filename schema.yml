@@ -1,0 +1,1460 @@
+openapi: 3.0.3
+info:
+  title: Blog Management Platform API
+  version: 1.0.0
+  description: Multi-author Blog Management Platform REST API
+paths:
+  /api/schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/login/:
+    post:
+      operationId: v1_auth_login_create
+      summary: Authenticate user and issue JWT session
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+          description: ''
+        '401':
+          description: Invalid credentials
+  /api/v1/auth/logout/:
+    post:
+      operationId: v1_auth_logout_create
+      summary: Log out and revoke active refresh token
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshInputRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshInputRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshInputRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Logged out successfully
+  /api/v1/auth/refresh/:
+    post:
+      operationId: v1_auth_refresh_create
+      summary: Rotate refresh token and issue new token pair
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshInputRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshInputRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshInputRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+          description: ''
+        '401':
+          description: Invalid, expired, or reused token
+  /api/v1/auth/register/:
+    post:
+      operationId: v1_auth_register_create
+      summary: Register new user account
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          description: User registered successfully
+        '400':
+          description: Validation error
+        '409':
+          description: Email or username already exists
+  /api/v1/auth/resend-verification/:
+    post:
+      operationId: v1_auth_resend_verification_create
+      summary: Resend verification email
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationEmailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationEmailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationEmailRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: Verification email dispatched if account exists
+  /api/v1/auth/verify-email/:
+    post:
+      operationId: v1_auth_verify_email_create
+      summary: Verify user email address
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          description: Email verified successfully
+        '400':
+          description: Invalid or expired token
+  /api/v1/categories/:
+    get:
+      operationId: v1_categories_list
+      summary: List all categories
+      tags:
+      - Categories
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+          description: ''
+  /api/v1/categories/{slug}/:
+    get:
+      operationId: v1_categories_retrieve
+      summary: Get category details by slug
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Categories
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+        '404':
+          description: Category not found
+  /api/v1/comments/{comment_id}/:
+    delete:
+      operationId: v1_comments_destroy
+      summary: Delete a comment (hard delete or placeholder for roots with replies)
+      parameters:
+      - in: path
+        name: comment_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Comments
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Comment deleted or placeholder set
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden - not the comment author
+        '404':
+          description: Comment not found
+  /api/v1/health/:
+    get:
+      operationId: v1_health_retrieve
+      description: Verifies database connectivity and service availability.
+      summary: Service Health Check
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckSuccessResponse'
+          description: Service is healthy
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckFailureResponse'
+          description: Service or database is unhealthy
+  /api/v1/posts/:
+    get:
+      operationId: v1_posts_list
+      summary: Browse published posts with filtering and search
+      parameters:
+      - in: query
+        name: author
+        schema:
+          type: string
+        description: Filter by author username
+      - in: query
+        name: category
+        schema:
+          type: string
+        description: Filter by category slug
+      - in: query
+        name: ordering
+        schema:
+          type: string
+        description: Sort by '-published_at' (default) or 'popular' / '-like_count'
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Full-text search query across title and content
+      tags:
+      - Posts
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostList'
+          description: ''
+    post:
+      operationId: v1_posts_create
+      summary: Create a new draft post
+      tags:
+      - Posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PostCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostDetail'
+          description: ''
+        '400':
+          description: Validation error
+        '401':
+          description: Not authenticated
+        '404':
+          description: Category not found
+  /api/v1/posts/{slug}/:
+    get:
+      operationId: v1_posts_retrieve
+      summary: Get post details by slug
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Posts
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostDetail'
+          description: ''
+        '404':
+          description: Post not found or private draft
+    patch:
+      operationId: v1_posts_partial_update
+      summary: Update a post
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPostUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPostUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPostUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostDetail'
+          description: ''
+        '400':
+          description: Validation error
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden - not the author
+        '404':
+          description: Post or category not found
+    delete:
+      operationId: v1_posts_destroy
+      summary: Delete a post
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Posts
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Post deleted successfully
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden - not the author
+        '404':
+          description: Post not found
+  /api/v1/posts/{slug}/bookmark/:
+    post:
+      operationId: v1_posts_bookmark_create
+      summary: Bookmark a published post
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Engagement
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookmarkStatus'
+          description: ''
+        '401':
+          description: Not authenticated
+        '404':
+          description: Published post not found
+    delete:
+      operationId: v1_posts_bookmark_destroy
+      summary: Remove bookmark from a published post
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Engagement
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: Bookmark removed
+        '401':
+          description: Not authenticated
+        '404':
+          description: Published post not found
+  /api/v1/posts/{slug}/comments/:
+    get:
+      operationId: v1_posts_comments_list
+      summary: List comments for a post (roots with prefetched replies)
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Comments
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommentTree'
+          description: ''
+        '404':
+          description: Published post not found
+    post:
+      operationId: v1_posts_comments_create
+      summary: Create a root comment or one-level reply on a published post
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Comments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CommentCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CommentCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentTree'
+          description: ''
+        '400':
+          description: Validation error or nested reply forbidden
+        '401':
+          description: Not authenticated
+        '404':
+          description: Published post or parent not found
+  /api/v1/posts/{slug}/like/:
+    post:
+      operationId: v1_posts_like_create
+      summary: Like a published post
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Engagement
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LikeStatus'
+          description: ''
+        '400':
+          description: Self-like prohibited or invalid post
+        '401':
+          description: Not authenticated
+        '404':
+          description: Published post not found
+    delete:
+      operationId: v1_posts_like_destroy
+      summary: Unlike a published post
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Engagement
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LikeStatus'
+          description: ''
+        '401':
+          description: Not authenticated
+        '404':
+          description: Published post not found
+  /api/v1/posts/{slug}/publish/:
+    post:
+      operationId: v1_posts_publish_create
+      summary: Publish a post
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostDetail'
+          description: ''
+        '400':
+          description: Blank content or invalid state
+        '401':
+          description: Not authenticated
+        '403':
+          description: Email not verified or not the author
+        '404':
+          description: Post not found
+  /api/v1/posts/{slug}/unpublish/:
+    post:
+      operationId: v1_posts_unpublish_create
+      summary: Unpublish a post (return to draft)
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostDetail'
+          description: ''
+        '401':
+          description: Not authenticated
+        '403':
+          description: Not the author
+        '404':
+          description: Post not found
+  /api/v1/users/{username}/:
+    get:
+      operationId: v1_users_retrieve
+      summary: Get public user profile by username
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicUserProfile'
+          description: ''
+        '404':
+          description: User profile not found
+  /api/v1/users/{username}/posts/:
+    get:
+      operationId: v1_users_posts_list
+      summary: List public published posts by author username
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - Posts
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostList'
+          description: ''
+        '404':
+          description: User not found
+  /api/v1/users/me/:
+    get:
+      operationId: v1_users_me_retrieve
+      summary: Get current user profile
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUserProfile'
+          description: ''
+    patch:
+      operationId: v1_users_me_partial_update
+      summary: Update current user profile
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUserProfile'
+          description: ''
+  /api/v1/users/me/bookmarks/:
+    get:
+      operationId: v1_users_me_bookmarks_list
+      summary: List current user's private bookmarked posts
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+      tags:
+      - Engagement
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookmarkItem'
+          description: ''
+        '401':
+          description: Not authenticated
+  /api/v1/users/me/deactivate/:
+    post:
+      operationId: v1_users_me_deactivate_create
+      summary: Deactivate and permanently anonymize current user account
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeactivateAccountRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DeactivateAccountRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DeactivateAccountRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Account deactivated successfully
+        '400':
+          description: Invalid password confirmation
+  /api/v1/users/me/posts/:
+    get:
+      operationId: v1_users_me_posts_list
+      summary: List current user's posts (drafts and published)
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Filter by 'draft' or 'published'
+      tags:
+      - Posts
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostList'
+          description: ''
+components:
+  schemas:
+    AuthorSummary:
+      type: object
+      properties:
+        username:
+          type: string
+        display_name:
+          type: string
+          readOnly: true
+        bio:
+          type: string
+          readOnly: true
+      required:
+      - bio
+      - display_name
+      - username
+    BookmarkItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        post:
+          allOf:
+          - $ref: '#/components/schemas/PostList'
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - post
+    BookmarkStatus:
+      type: object
+      properties:
+        bookmarked:
+          type: boolean
+      required:
+      - bookmarked
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 80
+        slug:
+          type: string
+          maxLength: 100
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+          maxLength: 300
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - slug
+      - updated_at
+    CategorySummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 80
+        slug:
+          type: string
+          maxLength: 100
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - id
+      - name
+      - slug
+    CommentCreateRequest:
+      type: object
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        parent_id:
+          type: integer
+          nullable: true
+      required:
+      - body
+    CommentTree:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        author:
+          type: object
+          additionalProperties: {}
+          nullable: true
+          readOnly: true
+        body:
+          type: string
+          readOnly: true
+        is_deleted:
+          type: boolean
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        replies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reply'
+          readOnly: true
+      required:
+      - author
+      - body
+      - created_at
+      - id
+      - replies
+      - updated_at
+    CurrentUserProfile:
+      type: object
+      properties:
+        username:
+          type: string
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        display_name:
+          type: string
+          maxLength: 80
+        bio:
+          type: string
+          maxLength: 500
+        is_email_verified:
+          type: boolean
+          readOnly: true
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - date_joined
+      - email
+      - is_email_verified
+      - username
+    DeactivateAccountRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+    HealthCheckFailureResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          default: unhealthy
+        database:
+          type: string
+          default: disconnected
+    HealthCheckSuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          default: ok
+        database:
+          type: string
+          default: connected
+    LikeStatus:
+      type: object
+      properties:
+        liked:
+          type: boolean
+        like_count:
+          type: integer
+      required:
+      - like_count
+      - liked
+    PatchedPostUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+        category_slug:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: ^[-a-zA-Z0-9_]+$
+        content_markdown:
+          type: string
+          maxLength: 50000
+    PatchedProfileUpdateRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+          maxLength: 80
+        bio:
+          type: string
+          maxLength: 500
+    PostCreateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 200
+        category_slug:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: ^[-a-zA-Z0-9_]+$
+        content_markdown:
+          type: string
+          default: ''
+          maxLength: 50000
+      required:
+      - category_slug
+      - title
+    PostDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 80
+          pattern: ^[-a-zA-Z0-9_]+$
+        excerpt:
+          type: string
+          maxLength: 300
+        content_markdown:
+          type: string
+        content_html:
+          type: string
+          readOnly: true
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
+          readOnly: true
+        author:
+          allOf:
+          - $ref: '#/components/schemas/AuthorSummary'
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        like_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author
+      - category
+      - content_html
+      - created_at
+      - id
+      - slug
+      - title
+      - updated_at
+    PostList:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 80
+          pattern: ^[-a-zA-Z0-9_]+$
+        excerpt:
+          type: string
+          maxLength: 300
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategorySummary'
+          readOnly: true
+        author:
+          allOf:
+          - $ref: '#/components/schemas/AuthorSummary'
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        like_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author
+      - category
+      - created_at
+      - id
+      - slug
+      - title
+      - updated_at
+    PublicUserProfile:
+      type: object
+      properties:
+        username:
+          type: string
+          readOnly: true
+        display_name:
+          type: string
+          maxLength: 80
+        bio:
+          type: string
+          maxLength: 500
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - date_joined
+      - username
+    Reply:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        author:
+          allOf:
+          - $ref: '#/components/schemas/AuthorSummary'
+          readOnly: true
+        body:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author
+      - body
+      - created_at
+      - id
+      - updated_at
+    ResendVerificationEmailRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    StatusEnum:
+      enum:
+      - draft
+      - published
+      type: string
+      description: |-
+        * `draft` - Draft
+        * `published` - Published
+    TokenRefreshInputRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    TokenResponse:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    UserLoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    UserRegistrationRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        username:
+          type: string
+          minLength: 1
+          maxLength: 30
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        display_name:
+          type: string
+          default: ''
+          maxLength: 80
+        bio:
+          type: string
+          default: ''
+          maxLength: 500
+      required:
+      - email
+      - password
+      - username
+    VerifyEmailRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+      required:
+      - token
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

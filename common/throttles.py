@@ -1,3 +1,4 @@
+from rest_framework.settings import api_settings
 from rest_framework.throttling import SimpleRateThrottle
 
 
@@ -8,6 +9,10 @@ class AuthRateThrottle(SimpleRateThrottle):
     """
 
     scope = "auth"
+
+    def get_rate(self):
+        rates = getattr(api_settings, "DEFAULT_THROTTLE_RATES", {})
+        return rates.get(self.scope)
 
     def get_cache_key(self, request, view):
         return self.get_ident(request)
@@ -20,6 +25,10 @@ class WriteRateThrottle(SimpleRateThrottle):
     """
 
     scope = "write"
+
+    def get_rate(self):
+        rates = getattr(api_settings, "DEFAULT_THROTTLE_RATES", {})
+        return rates.get(self.scope)
 
     def get_cache_key(self, request, view):
         if request.method in ("GET", "HEAD", "OPTIONS"):
