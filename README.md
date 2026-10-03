@@ -8,37 +8,214 @@ The platform is engineered as a **Modular Monolith** adhering to strict architec
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Django 5.1](https://img.shields.io/badge/django-5.1-green.svg)](https://www.djangoproject.com/)
 [![PostgreSQL 16+](https://img.shields.io/badge/postgresql-16+-blue.svg)](https://www.postgresql.org/)
+[![Next.js 15](https://img.shields.io/badge/next.js-15.5-black.svg)](https://nextjs.org/)
+[![Tailwind CSS v4](https://img.shields.io/badge/tailwind-v4-38bdf8.svg)](https://tailwindcss.com/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Coverage](https://img.shields.io/badge/coverage-93.8%25-brightgreen.svg)]()
 
 ---
 
-## Architecture & Design Principles
+## Application Showcase (Ghost-Inspired Interface)
+
+GhostPRESS pairs high-contrast editorial minimalism with a distraction-free creator studio.
+
+### 1. Publication Landing Page
+> Editorial hero header, dynamic category taxonomy pills, real-time debounced search, featured story card, and responsive publication feed.
+
+![Publication Landing Page](docs/images/publication_landing.png)
+
+### 2. Distraction-Free Article Reader
+> Long-form prose typography, author byline, floating engagement bar (likes, private bookmarks, sharing), and 1-level threaded discussion engine.
+
+![Article Reader](docs/images/article_reader.png)
+
+### 3. Ghost Admin Creator Studio (Dashboard Analytics)
+> Ghost Admin sidebar, real-time metrics cards (Total Articles, Published, Active Drafts, Reader Likes), and recent drafts manager.
+
+![Creator Studio Dashboard](docs/images/creator_studio_dashboard.png)
+
+### 4. Split-Pane Markdown Editor with Live Preview
+> Distraction-free authoring with live character/word counters, synchronized HTML rendering, category selector, and email-verification publishing gates.
+
+![Split-Pane Markdown Editor](docs/images/split_pane_editor.png)
+
+---
+
+## End-to-End System Architecture
+
+The system is architected as an asynchronous single-page frontend consuming a strictly modular Django 5.1 backend:
 
 ```mermaid
-flowchart LR
-    subgraph Modular Monolith
-        engagement["engagement"] --> blog["blog"]
-        comments["comments"] --> blog
-        engagement --> accounts["accounts"]
-        comments --> accounts
-        blog --> accounts
-        engagement --> common["common"]
-        comments --> common
-        blog --> common
-        accounts --> common
+flowchart TD
+    subgraph ClientLayer["Frontend Client Layer (Next.js 15 App Router & React 19)"]
+        Landing["Publication Feed (/)\n• Hero & Featured Story\n• Category Taxonomy Pills\n• Debounced Live Search\n• Editorial Grid & Pagination"]
+        Reader["Article Reader (/posts/[slug])\n• Prose Typography\n• Floating Engagement Bar\n• Self-Like Prevention UI\n• 1-Level Discussion Engine"]
+        Studio["Ghost Admin Studio (/workspace)\n• Sidebar Navigation\n• Real-Time Metric Stat Cards\n• Posts Manager (Draft/Publish)\n• Private Bookmarks List\n• Profile & Deactivation"]
+        Editor["Split-Pane Editor (/workspace?tab=editor)\n• Real-Time Markdown Input\n• Live Synchronized HTML Preview\n• Word Counter & Taxonomies\n• Email-Verified Gate Check"]
+        AuthContext["AuthContext & API Client (lib/api.ts)\n• LocalStorage Token Pair Storage\n• Auto Token Refresh on 401\n• Cross-Tab Auth Synchronization"]
     end
+
+    subgraph TransportLayer["REST API Transport Layer (DRF 3.17)"]
+        AuthEndpoints["/api/v1/auth/\n• register/\n• login/\n• refresh/\n• verify-email/"]
+        UsersEndpoints["/api/v1/users/\n• me/\n• me/posts/\n• me/bookmarks/\n• me/deactivate/"]
+        PostsEndpoints["/api/v1/posts/\n• CRUD & Slug Routing\n• publish/ & unpublish/\n• like/ & bookmark/\n• comments/"]
+        CategoriesEndpoints["/api/v1/categories/\n• Taxonomy Listing\n• Slug Filtering"]
+    end
+
+    subgraph ServiceLayer["Modular Monolith Domain Layer"]
+        subgraph AccountsDomain["accounts app"]
+            UserManager["Custom UserManager\n• Case-insensitive Lower()\n• Argon2id Hashing"]
+            TokenFamily["Token Family Engine\n• Refresh Token Trees\n• Replay Attack Detection"]
+            Anonymizer["In-Place Anonymizer\n• Drafts & Bookmarks Purge\n• Identity Redaction"]
+        end
+
+        subgraph BlogDomain["blog app"]
+            PostServices["Post Services & Selectors\n• Slug Generation & Collision Retries\n• Server Word Boundary Excerpts\n• Email Verification Gate Check"]
+            MarkdownEngine["Markdown Sanitizer\n• markdown-it-py AST\n• nh3 Tag/Attribute Allowlist"]
+            SearchEngine["PostgreSQL Search Engine\n• Weighted TSVector Index\n• Full-Text Query Execution"]
+        end
+
+        subgraph CommentsDomain["comments app"]
+            CommentTree["1-Level Discussion Engine\n• Root + Single Reply Constraint\n• Soft-Delete Placeholder Redaction"]
+        end
+
+        subgraph EngagementDomain["engagement app"]
+            EngagementServices["Engagement Services\n• Atomic Like Increments\n• Self-Like Prohibition Check\n• Private User Bookmarks"]
+        end
+    end
+
+    subgraph DatabaseLayer["Database Authority (PostgreSQL 16+)"]
+        Postgres[(PostgreSQL 16 Enterprise DB\n• Partial Unique Indexes\n• Database Check Constraints\n• Foreign Keys & PROTECT\n• tsvector Search Vectors\n• ACID Atomic Transactions)]
+    end
+
+    Landing --> AuthContext
+    Reader --> AuthContext
+    Studio --> AuthContext
+    Editor --> AuthContext
+    AuthContext --> TransportLayer
+
+    TransportLayer --> ServiceLayer
+    ServiceLayer --> DatabaseLayer
 ```
 
-1. **Modular Monolith**: One deployable Django project partitioned into clean apps (`common`, `accounts`, `blog`, `comments`, `engagement`) with strict one-way dependency enforcement.
-2. **Thin Transport, Explicit Business Layer**:
-   - **Views (`views.py`)**: Thin HTTP handlers for routing, status codes, and input/output mapping.
-   - **Services (`services.py`)**: All state-mutating business logic and explicit `transaction.atomic` blocks.
-   - **Selectors (`selectors.py`)**: Optimized read queries, annotations, and visibility rules.
-3. **Database as the Final Authority**: Uniqueness, foreign keys, and business invariants are enforced in PostgreSQL via check constraints and partial indexes.
-4. **Session Security & Reuse Detection**: Refresh tokens are tracked in token families with automatic family-wide revocation upon reuse detection.
-5. **Sanitized Content Pipeline**: Markdown is rendered with raw HTML disabled and sanitized using `nh3` allowlisting. Excerpts are truncated at word boundaries.
-6. **In-Place Irreversible Anonymization**: Deactivating an account anonymizes identity (`deleted-<id>@deleted.invalid`), purges private drafts and bookmarks, while preserving published posts, comments, and likes.
+---
+
+## Relational Database Schema (ER Diagram)
+
+All domain rules and business invariants are enforced as the final authority in PostgreSQL via constraints, foreign keys, and partial indexes:
+
+```mermaid
+erDiagram
+    accounts_user ||--|| accounts_profile : "has"
+    accounts_user ||--o{ accounts_emailverificationtoken : "issued"
+    accounts_user ||--o{ accounts_refreshtokenrecord : "sessions"
+    accounts_user ||--o{ blog_post : "authors"
+    accounts_user ||--o{ comments_comment : "writes"
+    accounts_user ||--o{ engagement_like : "likes"
+    accounts_user ||--o{ engagement_bookmark : "saves"
+
+    blog_category ||--o{ blog_post : "categorizes (PROTECT)"
+    blog_post ||--o{ comments_comment : "has"
+    blog_post ||--o{ engagement_like : "receives"
+    blog_post ||--o{ engagement_bookmark : "bookmarked"
+
+    comments_comment ||--o{ comments_comment : "replies (max 1 level)"
+
+    accounts_user {
+        bigint id PK
+        varchar email UK "Lower(email) unique"
+        varchar username UK "Lower(username) unique"
+        varchar password "Argon2id hashed"
+        boolean is_active
+        boolean is_staff
+        boolean is_superuser
+        timestamptz email_verified_at "null if unverified"
+        timestamptz deactivated_at "null if active"
+        timestamptz date_joined
+        timestamptz last_login
+    }
+
+    accounts_profile {
+        bigint id PK
+        bigint user_id FK,UK "One-to-One"
+        varchar display_name
+        text bio
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    accounts_emailverificationtoken {
+        bigint id PK
+        bigint user_id FK
+        varchar token_hash UK "SHA-256 hashed"
+        timestamptz expires_at
+        boolean is_used
+        timestamptz created_at
+    }
+
+    accounts_refreshtokenrecord {
+        bigint id PK
+        bigint user_id FK
+        uuid family_id "Tracked family branch"
+        varchar token_jti UK "Unique JWT identifier"
+        varchar parent_jti "Previous rotated token"
+        boolean is_revoked "True on replay detection"
+        timestamptz expires_at
+        timestamptz created_at
+    }
+
+    blog_category {
+        bigint id PK
+        varchar name UK
+        varchar slug UK
+        text description
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    blog_post {
+        bigint id PK
+        bigint author_id FK
+        bigint category_id FK
+        varchar title
+        varchar slug UK "Immutable URL identifier"
+        varchar status "draft | published"
+        text excerpt "Word-boundary truncated"
+        text content_markdown "Raw author markdown"
+        text content_text "Derived plain text"
+        timestamptz published_at "null if draft"
+        integer like_count "Atomic counter"
+        tsvector search_vector "Title(A) + Content(B)"
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    comments_comment {
+        bigint id PK
+        bigint post_id FK
+        bigint author_id FK "nullable for deleted users"
+        bigint parent_id FK "nullable, self-reference max 1 level"
+        text body "Redacted if is_deleted"
+        boolean is_deleted "Soft-delete placeholder"
+        timestamptz deleted_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    engagement_like {
+        bigint id PK
+        bigint user_id FK
+        bigint post_id FK
+        timestamptz created_at
+    }
+
+    engagement_bookmark {
+        bigint id PK
+        bigint user_id FK
+        bigint post_id FK
+        timestamptz created_at
+    }
+```
 
 ---
 
