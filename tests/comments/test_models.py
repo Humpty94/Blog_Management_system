@@ -4,7 +4,7 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from accounts.services import deactivate_user
-from blog.models import Category, Post
+from blog.models import Category
 from blog.services import create_post, delete_post, publish_post
 from comments.models import Comment
 

@@ -48,7 +48,7 @@ def published_post(author):
 
 @pytest.fixture
 def draft_post(author):
-    category = Category.objects.get(slug="tech")
+    category, _ = Category.objects.get_or_create(name="Tech", slug="tech")
     return create_post(
         author=author,
         category=category,
