@@ -52,8 +52,10 @@ flowchart LR
 | **Database** | PostgreSQL 16+ via `psycopg` 3 | Check constraints, partial indexes, Full-Text Search |
 | **Auth & Tokens** | `argon2-cffi` + `simplejwt` | Argon2id password hashing + custom refresh token family tracking |
 | **Markdown** | `markdown-it-py` + `nh3` | Defense-in-depth HTML sanitization |
+| **Frontend** | Next.js 15 + TypeScript + Tailwind CSS | Ghost-inspired publication & creator studio |
+| **Icons** | `lucide-react` | Clean editorial iconography |
 | **API Contract** | `drf-spectacular` | OpenAPI 3.0 schema generation |
-| **Code Quality** | `ruff`, `pytest`, `pytest-cov` | Fast linting, formatting, and high-coverage testing |
+| **Code Quality** | `ruff`, `pytest`, `pytest-cov`, ESLint | Fast linting, formatting, and high-coverage testing |
 
 ---
 
@@ -61,9 +63,10 @@ flowchart LR
 
 ### Prerequisites
 - Python 3.12+
+- Node.js 20+ & npm 10+
 - PostgreSQL 16+ running on `127.0.0.1:5432`
 
-### 1. Clone & Set Up Virtual Environment
+### 1. Clone & Set Up Backend Virtual Environment
 
 ```bash
 git clone https://github.com/Humpty94/Blog_Management_system.git
@@ -74,7 +77,7 @@ source .venv/bin/activate
 pip install -r requirements-dev.txt
 ```
 
-### 2. Configure Environment
+### 2. Configure Backend Environment
 
 Copy the example environment configuration:
 
@@ -96,13 +99,29 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-### 4. Start Development Server
+### 4. Start Backend Server
 
 ```bash
 python manage.py runserver
 ```
 
-The API is now accessible at `http://127.0.0.1:8000/api/v1/`.
+The Django REST API is accessible at `http://127.0.0.1:8000/api/v1/`.
+
+### 5. Start Frontend (Ghost-inspired Publication & Studio)
+
+In a separate terminal:
+
+```bash
+cd frontend
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+The Ghost publication is accessible at `http://localhost:3000`:
+- **Landing Page (`/`)**: Ghost hero header, category filter pills, live debounced search, featured post, and editorial grid.
+- **Article Reader (`/posts/[slug]`)**: Editorial prose typography, live like/bookmark toggles with self-like protection, and 1-level discussion engine with soft-deletion placeholders.
+- **Ghost Admin Studio (`/workspace`)**: Sidebar navigation, metrics dashboard, post table with draft/published status badges, distraction-free split-pane Markdown editor with live preview, private bookmarks, and profile/security settings.
 
 ---
 
